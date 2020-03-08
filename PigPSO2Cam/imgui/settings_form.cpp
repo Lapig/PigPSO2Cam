@@ -20,11 +20,11 @@ void luaPrint(std::string s) {
 
 	runLuaAsync(dist.c_str());
 }
-
+/*
 void resetParam() {
 	const char *a1 = "ResetParam()";
 	runLuaAsync(a1);
-}
+}*/
 
 bool runLuaAsync(std::string a1) {
 	if (initLuaHook()) {
@@ -39,21 +39,6 @@ bool runLua(std::string a1) {
 	const char* cA1 = a1.c_str();
 	
 	_executeLua(cA1);
-	return true;
-}
-
-
-//no explanation honestly
-bool writeStructValue(int& addy, byte value) {
-	addy = value;
-	return true;
-}
-bool writeStructValue(byte& addy, byte value) {
-	addy = value;
-	return true;
-}
-bool writeStructValue(int& addy, DWORD value) {
-	addy = value;
 	return true;
 }
 

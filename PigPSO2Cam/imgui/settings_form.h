@@ -15,14 +15,10 @@ typedef HRESULT(__stdcall* pso2hDoLua)(const char* a1);
 static pso2hDoLua _executeLua = 0;
 
 bool runLua(std::string a1);
-void resetParam();
+
 bool initLuaHook();
 
 bool runLuaAsync(std::string a1);
-
-bool writeStructValue(int& addy, byte value);
-bool writeStructValue(byte&, byte);
-bool writeStructValue(int& addy, DWORD value);
 
 void menu_init(void*, LPDIRECT3DDEVICE9);
 
@@ -35,12 +31,18 @@ static bool freeCamToggle = false;
 
 static DWORD oNearCullBytes = 0x0;
 
+
+static bool pushCamera()
+{
+	return runLuaAsync("Camera.PushActorTest()");
+}
+
 static bool adjustZoom() {
 	std::stringstream ss;
 	ss << "Camera.ActorTrackTestNormal.Offset.Dist = \"" << Camera::cameraBase.Offset.Dist << "\"";
 	std::string dist(ss.str());
 	runLuaAsync(dist.c_str());
-	runLuaAsync("ResetParam()");
+	pushCamera();
 
 	return true;
 }
@@ -59,7 +61,7 @@ static bool adjustFovy() {
 	ss << "Camera.ActorTrackTestNormal.Fovy = " << Camera::cameraBase.Fovy;
 	std::string dist(ss.str());
 	runLuaAsync(dist.c_str());
-	runLuaAsync("ResetParam()");
+	pushCamera();
 
 	return true;
 }
@@ -114,11 +116,11 @@ static void draw_menu(bool* status)
 			//Honestly not quite sure what these two are, figured for culling but idk
 			if (ImGui::Button("Set DistMin", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
 				runLuaAsync(adjustDistmin((float)Camera::cameraBase.Offset.DistMin));
-				resetParam();
+				pushCamera();
 			}
 			if (ImGui::Button("Set DistMax", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
 				runLuaAsync(adjustDistmax((float)Camera::cameraBase.Offset.DistMax));
-				resetParam();
+				pushCamera();
 			}
 			ImGui::EndColumns();
 
@@ -179,9 +181,9 @@ static void draw_menu(bool* status)
 						*(DWORD*)(tNearCull) = (DWORD)(oNearCullBytes);
 				}
 			}
-			if (ImGui::Button("ResetParam", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
+		/*	if (ImGui::Button("ResetParam", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
 				resetParam();
-			}
+			}*/
 			ImGui::EndColumns();
 			ImGui::Separator();
 
@@ -195,21 +197,24 @@ static void draw_menu(bool* status)
 			if (ImGui::Checkbox("##freecamcheck", &freeCamToggle))
 			{
 				DWORD funcStart = 0x04FD39D0;
-				if(freeCamToggle)
+				if (*(BYTE*)(funcStart) != 0x55)
 				{
-					*(BYTE*)(funcStart) = 0x31;		//xor eax,eax ret 0008
-					*(BYTE*)(funcStart + 1) = 0xC0;
-					*(BYTE*)(funcStart + 2) = 0xC2;
-					*(BYTE*)(funcStart + 3) = 0x08;
-					*(BYTE*)(funcStart + 4) = 0x00;
-				}
-				else
-				{
-					*(BYTE*)(funcStart) = 0x55;	   //restore entrance
-					*(BYTE*)(funcStart+1) = 0x8B;
-					*(BYTE*)(funcStart+2) = 0xEC;
-					*(BYTE*)(funcStart+3) = 0x83;
-					*(BYTE*)(funcStart+4) = 0xE4;
+					if (freeCamToggle)
+					{
+						*(BYTE*)(funcStart) = 0x31;		//xor eax,eax ret 0008
+						*(BYTE*)(funcStart + 1) = 0xC0;
+						*(BYTE*)(funcStart + 2) = 0xC2;
+						*(BYTE*)(funcStart + 3) = 0x08;
+						*(BYTE*)(funcStart + 4) = 0x00;
+					}
+					else
+					{
+						*(BYTE*)(funcStart) = 0x55;	   //restore entrance
+						*(BYTE*)(funcStart + 1) = 0x8B;
+						*(BYTE*)(funcStart + 2) = 0xEC;
+						*(BYTE*)(funcStart + 3) = 0x83;
+						*(BYTE*)(funcStart + 4) = 0xE4;
+					}
 				}
 			}
 		}
