@@ -197,7 +197,7 @@ static void draw_menu(bool* status)
 			if (ImGui::Checkbox("##freecamcheck", &freeCamToggle))
 			{
 				DWORD funcStart = 0x04FD39D0;
-				if (*(BYTE*)(funcStart) != 0x55)
+				if (!freeCamToggle || *(BYTE*)(funcStart) == 0x55)
 				{
 					if (freeCamToggle)
 					{
