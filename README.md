@@ -4,7 +4,17 @@ Allows you to do some moderately useful things with your camera in PSO2
 
 #### Usage
 
-+ Download the latest release and put it in your plugins folder if you use tweaker or just manually map inject it if you do not use tweaker 
+  Download the latest release and inject with Xenos or your preferred injector 
+
+```
+Xenos Settings
+
+Type: Manual Map 
+
+No Exception Support
+Ignore TLS
+Close after Injection
+```
 + Press INS to bring up the menu
 
 #### Build Requirements

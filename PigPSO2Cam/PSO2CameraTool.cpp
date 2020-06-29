@@ -3,7 +3,7 @@
 
 #include <detours.h>
 #include <d3d9.h>
-#include <d3dx9.h>
+#include <D3dx9core.h>
 #include "Asm.h"
 #include "imgui/settings_form.h"
 
@@ -132,6 +132,7 @@ bool CreateDeviceD3D(HWND hWnd)
 	g_d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;
 	g_d3dpp.EnableAutoDepthStencil = TRUE;
 	g_d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
+	g_d3dpp.hDeviceWindow = game_hwnd;
 	g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;           // Present with vsync
 	//g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   // Present without vsync, maximum unthrottled framerate
 	if (g_pD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &g_d3dpp, &g_pd3dDevice) < 0)
@@ -184,7 +185,7 @@ int Initialize() {
 		Sleep(100);
 		hmRendDx9Base = GetModuleHandleA("d3d9.dll");
 	}
-	Sleep(5000); //meme to allow tweaker to load dll
+	//Sleep(5000); //meme to allow tweaker to load dll
 	EnumWindows(find_game_hwnd, GetCurrentProcessId());
 //	ShowDebugConsole();
 	
