@@ -76,7 +76,7 @@ static void draw_menu(bool* status)
 	ImGui::GetIO().MouseDrawCursor = true;
 
 	ImGui::SetNextWindowPos(ImVec2(ImGui::GetWindowSize().x / 2, ImGui::GetWindowSize().y / 2), ImGuiCond_Appearing);
-	ImGui::SetNextWindowSize(ImVec2(480.0f, 300.f), ImGuiCond_Appearing);
+	ImGui::SetNextWindowSize(ImVec2(480.0f, 265.f), ImGuiCond_Appearing);
 
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoCollapse;
 
@@ -185,9 +185,8 @@ static void draw_menu(bool* status)
 				resetParam();
 			}*/
 			ImGui::EndColumns();
-			ImGui::Separator();
 
-			
+			/*ImGui::Separator();
 			ImGui::Text("Ghost Ride da Whip");
 			if (ImGui::IsItemHovered())
 			{
@@ -217,6 +216,7 @@ static void draw_menu(bool* status)
 					}
 				}
 			}
+			*/
 		}
 		ImGui::EndGroup();
 		break;

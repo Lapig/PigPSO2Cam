@@ -10,6 +10,7 @@
 using namespace Asm;
 
 bool m_bCreated = false;
+bool wndproc_found = false;
 D3DVIEWPORT9 viewport;
 LPD3DXFONT dxFont;
 HMODULE hmRendDx9Base = NULL;
@@ -71,7 +72,8 @@ HRESULT __stdcall hkEndScene(LPDIRECT3DDEVICE9 Device)
 		m_bCreated = true;
 		D3DXCreateFontA(Device, 20, 0, FW_BOLD, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, PROOF_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Consolas", &dxFont);
 		Device->GetViewport(&viewport);
-		game_wndproc = reinterpret_cast<WNDPROC>(SetWindowLongPtr(game_hwnd, GWLP_WNDPROC, (LONG_PTR)WndProc));
+
+		//game_wndproc = reinterpret_cast<WNDPROC>(SetWindowLongPtr(d3dhwnd, GWLP_WNDPROC, (LONG_PTR)WndProc));
 
 		DWORD farCullScan = AobScan(cameraFarCullAob);
 		if (farCullScan)
@@ -85,7 +87,16 @@ HRESULT __stdcall hkEndScene(LPDIRECT3DDEVICE9 Device)
 		if (nearCullScan)
 			cameraNearCullAddy = nearCullScan;
 		
-		menu_init(game_hwnd, Device);
+		//menu_init(d3dhwnd, Device);
+	}
+	if (!wndproc_found) {
+		HWND wnd = FindWindowA("Phantasy Star Online 2", NULL);
+		if (wnd) {
+			game_wndproc = reinterpret_cast<WNDPROC>(SetWindowLongPtr(wnd, GWLP_WNDPROC, (LONG_PTR)WndProc));
+			menu_init(game_hwnd, Device);
+
+			wndproc_found = true;
+		}
 	}
 
 	if ((GetAsyncKeyState(0x2D) & 1)) { //insert
@@ -120,8 +131,11 @@ HRESULT APIENTRY hkReset(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPres
 
 
 DWORD_PTR* pVTable;
+HWND tmpWnd;
 bool CreateDeviceD3D(HWND hWnd)
 {
+	tmpWnd = CreateWindowA("BUTTON", "DX", WS_SYSMENU | WS_MINIMIZEBOX, CW_USEDEFAULT, CW_USEDEFAULT, 300, 300, NULL, NULL, GetModuleHandle(NULL), NULL);
+
 	if ((g_pD3D = Direct3DCreate9(D3D_SDK_VERSION)) == NULL)
 		return false;
 
@@ -132,9 +146,9 @@ bool CreateDeviceD3D(HWND hWnd)
 	g_d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;
 	g_d3dpp.EnableAutoDepthStencil = TRUE;
 	g_d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
-	g_d3dpp.hDeviceWindow = game_hwnd;
-	g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;           // Present with vsync
-	//g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   // Present without vsync, maximum unthrottled framerate
+	g_d3dpp.hDeviceWindow = tmpWnd;
+	//g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;           // Present with vsync
+	g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   // Present without vsync, maximum unthrottled framerate
 	if (g_pD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &g_d3dpp, &g_pd3dDevice) < 0)
 		return false;
 
@@ -159,6 +173,7 @@ DWORD WINAPI HookThread()
 	DetourAttach(&(LPVOID&)oReset, (PBYTE)hkReset);
 	DetourTransactionCommit();
 
+	DestroyWindow(tmpWnd);
 	return 0;
 }
 
@@ -182,11 +197,14 @@ void ShowDebugConsole()
 int Initialize() {
 	while (hmRendDx9Base == NULL)
 	{
-		Sleep(100);
+		Sleep(200);
 		hmRendDx9Base = GetModuleHandleA("d3d9.dll");
 	}
-	//Sleep(5000); //meme to allow tweaker to load dll
-	EnumWindows(find_game_hwnd, GetCurrentProcessId());
+	while (game_hwnd == NULL) {
+		Sleep(200);
+		game_hwnd = FindWindowA("Phantasy Star Online 2", NULL);
+	}
+	//EnumWindows(find_game_hwnd, GetCurrentProcessId());
 //	ShowDebugConsole();
 	
 	
