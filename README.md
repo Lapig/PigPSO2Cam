@@ -4,7 +4,9 @@ Allows you to do some moderately useful things with your camera in PSO2
 
 #### Usage
 
-  Download the latest release and inject with Xenos or your preferred injector 
+  Drop the release dll into your plugin folder if you use a launcher with plugin support 
+  
+  Alternatively just inject with Xenos/preferred injector 
 
 ```
 Xenos Settings
