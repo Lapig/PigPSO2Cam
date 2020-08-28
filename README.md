@@ -1,23 +1,13 @@
-Allows you to do some moderately useful things with your camera in PSO2
+Assorted tweaks for JP PSO2 including adjusting camera FOV/Zoom, View Culling, and BGM
 
-![UI](https://i.imgur.com/IQT10Aa.png)
+![UI](https://ptpimg.me/lmjao1.png)
 
 #### Usage
 
-  Drop the release dll into your plugin folder if you use a launcher with plugin support 
-  
-  Alternatively just inject with Xenos/preferred injector 
+  Download the latest release DLL and place in your launchers plugin folder <br>
+  Press INS to bring up the menu once in game
 
-```
-Xenos Settings
-
-Type: Manual Map 
-
-No Exception Support
-Ignore TLS
-Close after Injection
-```
-+ Press INS to bring up the menu
+  A somewhat dated BGM name list can be found here https://gist.github.com/Lapig/5e35972e4ba2dc83318f80a388152857
 
 #### Build Requirements
 
