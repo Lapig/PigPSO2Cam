@@ -30,7 +30,7 @@ static bool nearCullDisabled = false;
 static bool freeCamToggle = false;
 
 static DWORD oNearCullBytes = 0x0;
-
+static char bgmbuf[1024];
 
 static bool pushCamera()
 {
@@ -76,9 +76,9 @@ static void draw_menu(bool* status)
 	ImGui::GetIO().MouseDrawCursor = true;
 
 	ImGui::SetNextWindowPos(ImVec2(ImGui::GetWindowSize().x / 2, ImGui::GetWindowSize().y / 2), ImGuiCond_Appearing);
-	ImGui::SetNextWindowSize(ImVec2(480.0f, 265.f), ImGuiCond_Appearing);
+	ImGui::SetNextWindowSize(ImVec2(480.0f, 245.f), ImGuiCond_Appearing);
 
-	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoCollapse;
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar;
 
 	ImGui::Begin("PIG PSO2", status, window_flags);
 
@@ -97,15 +97,7 @@ static void draw_menu(bool* status)
 			ImGui::Text(("Fovy "));
 			ImGui::SameLine(50.0, ImGui::GetStyle().ItemSpacing.y);
 			ImGui::SliderInt(("##fovslider"), &Camera::cameraBase.Fovy, 40, 58);
-			ImGui::Text(("DistMin "));
-			ImGui::SameLine(50.0, ImGui::GetStyle().ItemSpacing.y);
-			ImGui::SliderInt(("##distminlider"), &Camera::cameraBase.Offset.DistMin, 4, 10);
-			ImGui::Text(("DistMax "));
-			ImGui::SameLine(50.0, ImGui::GetStyle().ItemSpacing.y);
-			ImGui::SliderInt(("##distmaxlider"), &Camera::cameraBase.Offset.DistMax, 30, 300);
 
-			
-			
 			ImGui::NextColumn();
 			if (ImGui::Button("Set Zoom", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
 				adjustZoom();
@@ -113,15 +105,7 @@ static void draw_menu(bool* status)
 			if (ImGui::Button("Set FOV", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
 				adjustFovy();
 			}
-			//Honestly not quite sure what these two are, figured for culling but idk
-			if (ImGui::Button("Set DistMin", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
-				runLuaAsync(adjustDistmin((float)Camera::cameraBase.Offset.DistMin));
-				pushCamera();
-			}
-			if (ImGui::Button("Set DistMax", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
-				runLuaAsync(adjustDistmax((float)Camera::cameraBase.Offset.DistMax));
-				pushCamera();
-			}
+
 			ImGui::EndColumns();
 
 			ImGui::Separator();
@@ -133,6 +117,12 @@ static void draw_menu(bool* status)
 			ImGui::Spacing();
 			ImGui::Text("Disable Object Near Culling ");
 			ImGui::Spacing();
+			ImGui::Spacing();
+
+			ImGui::Text("BGM");
+			ImGui::SameLine();
+			ImGui::InputText("##BGM", bgmbuf, sizeof(bgmbuf));
+
 			ImGui::NextColumn();
 			if (ImGui::Checkbox("##farcullcheck", &farCullDisabled))
 			{
@@ -181,42 +171,14 @@ static void draw_menu(bool* status)
 						*(DWORD*)(tNearCull) = (DWORD)(oNearCullBytes);
 				}
 			}
-		/*	if (ImGui::Button("ResetParam", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
-				resetParam();
-			}*/
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 5);//tism
+			if (ImGui::Button("Play BGM", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
+				std::string s("Skit.Sound.BGM.Play('"+std::string(bgmbuf)+"')");
+				runLuaAsync(s);
+			}
 			ImGui::EndColumns();
 
-			/*ImGui::Separator();
-			ImGui::Text("Ghost Ride da Whip");
-			if (ImGui::IsItemHovered())
-			{
-				ImGui::SetTooltip("Will break after some patch eventually");
-			}
-			ImGui::SameLine(0.0, ImGui::GetStyle().ItemSpacing.y);
-			if (ImGui::Checkbox("##freecamcheck", &freeCamToggle))
-			{
-				DWORD funcStart = 0x04FD39D0;
-				if (!freeCamToggle || *(BYTE*)(funcStart) == 0x55)
-				{
-					if (freeCamToggle)
-					{
-						*(BYTE*)(funcStart) = 0x31;		//xor eax,eax ret 0008
-						*(BYTE*)(funcStart + 1) = 0xC0;
-						*(BYTE*)(funcStart + 2) = 0xC2;
-						*(BYTE*)(funcStart + 3) = 0x08;
-						*(BYTE*)(funcStart + 4) = 0x00;
-					}
-					else
-					{
-						*(BYTE*)(funcStart) = 0x55;	   //restore entrance
-						*(BYTE*)(funcStart + 1) = 0x8B;
-						*(BYTE*)(funcStart + 2) = 0xEC;
-						*(BYTE*)(funcStart + 3) = 0x83;
-						*(BYTE*)(funcStart + 4) = 0xE4;
-					}
-				}
-			}
-			*/
+			
 		}
 		ImGui::EndGroup();
 		break;

@@ -73,8 +73,11 @@ HRESULT __stdcall hkEndScene(LPDIRECT3DDEVICE9 Device)
 		D3DXCreateFontA(Device, 20, 0, FW_BOLD, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, PROOF_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Consolas", &dxFont);
 		Device->GetViewport(&viewport);
 
-		//game_wndproc = reinterpret_cast<WNDPROC>(SetWindowLongPtr(d3dhwnd, GWLP_WNDPROC, (LONG_PTR)WndProc));
+		D3DDEVICE_CREATION_PARAMETERS d3dcp;
+		Device->GetCreationParameters(&d3dcp);
 
+		game_hwnd = d3dcp.hFocusWindow;
+		
 		DWORD farCullScan = AobScan(cameraFarCullAob);
 		if (farCullScan)
 			cameraFarCullJna = farCullScan;
@@ -144,8 +147,6 @@ bool CreateDeviceD3D(HWND hWnd)
 	g_d3dpp.Windowed = TRUE;
 	g_d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
 	g_d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;
-	g_d3dpp.EnableAutoDepthStencil = TRUE;
-	g_d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
 	g_d3dpp.hDeviceWindow = tmpWnd;
 	//g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;           // Present with vsync
 	g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   // Present without vsync, maximum unthrottled framerate
@@ -173,6 +174,8 @@ DWORD WINAPI HookThread()
 	DetourAttach(&(LPVOID&)oReset, (PBYTE)hkReset);
 	DetourTransactionCommit();
 
+	g_pD3D->Release();
+	g_pd3dDevice->Release();
 	DestroyWindow(tmpWnd);
 	return 0;
 }
@@ -204,9 +207,7 @@ int Initialize() {
 		Sleep(200);
 		game_hwnd = FindWindowA("Phantasy Star Online 2", NULL);
 	}
-	//EnumWindows(find_game_hwnd, GetCurrentProcessId());
-//	ShowDebugConsole();
-	
+	Sleep(1000); //idk it just be like this
 	
 	HookThread();
 	return 1;
