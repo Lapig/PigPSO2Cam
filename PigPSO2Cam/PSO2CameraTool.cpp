@@ -198,7 +198,7 @@ void ShowDebugConsole()
 	SetConsoleTitleA(charConsoleName);
 }
 int Initialize() {
-	while (hmRendDx9Base == NULL)
+	/*while (hmRendDx9Base == NULL)
 	{
 		Sleep(200);
 		hmRendDx9Base = GetModuleHandleA("d3d9.dll");
@@ -208,7 +208,7 @@ int Initialize() {
 		game_hwnd = FindWindowA("Phantasy Star Online 2", NULL);
 	}
 	Sleep(1000); //idk it just be like this
-	
+	*/
 	HookThread();
 	return 1;
 }
