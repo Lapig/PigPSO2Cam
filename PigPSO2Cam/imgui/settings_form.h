@@ -10,7 +10,6 @@
 
 #include "../PSO2CameraTool.hpp"
 
-
 typedef HRESULT(__stdcall* pso2hDoLua)(const char* a1);
 static pso2hDoLua _executeLua = 0;
 
@@ -76,13 +75,13 @@ static void draw_menu(bool* status)
 	ImGui::GetIO().MouseDrawCursor = true;
 
 	ImGui::SetNextWindowPos(ImVec2(ImGui::GetWindowSize().x / 2, ImGui::GetWindowSize().y / 2), ImGuiCond_Appearing);
-	ImGui::SetNextWindowSize(ImVec2(480.0f, 245.f), ImGuiCond_Appearing);
+	ImGui::SetNextWindowSize(ImVec2(480.0f, 200.f), ImGuiCond_Appearing);
 
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar;
 
 	ImGui::Begin("PIG PSO2", status, window_flags);
 
-
+	
 	switch (currTab) {
 	case 0:
 	{
@@ -93,10 +92,10 @@ static void draw_menu(bool* status)
 
 			ImGui::Text(("Zoom "));
 			ImGui::SameLine(50.0, ImGui::GetStyle().ItemSpacing.y);
-			ImGui::SliderInt(("##zoomslider"), &Camera::cameraBase.Offset.Dist, 6, 14);
+			ImGui::SliderInt(("##zoomslider"), &Camera::cameraBase.Offset.Dist, 6, 25);
 			ImGui::Text(("Fovy "));
 			ImGui::SameLine(50.0, ImGui::GetStyle().ItemSpacing.y);
-			ImGui::SliderInt(("##fovslider"), &Camera::cameraBase.Fovy, 40, 58);
+			ImGui::SliderInt(("##fovslider"), &Camera::cameraBase.Fovy, 40, 90);
 
 			ImGui::NextColumn();
 			if (ImGui::Button("Set Zoom", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
@@ -111,11 +110,7 @@ static void draw_menu(bool* status)
 			ImGui::Separator();
 
 			ImGui::Columns(2);
-			ImGui::Text("Disable Terrain Far Culling ");
-			ImGui::Spacing();//meme alignment
-			ImGui::Text("Disable Object Far Culling ");
-			ImGui::Spacing();
-			ImGui::Text("Disable Object Near Culling ");
+			ImGui::Text("Culling Patches");
 			ImGui::Spacing();
 			ImGui::Spacing();
 
@@ -124,7 +119,7 @@ static void draw_menu(bool* status)
 			ImGui::InputText("##BGM", bgmbuf, sizeof(bgmbuf));
 
 			ImGui::NextColumn();
-			if (ImGui::Checkbox("##farcullcheck", &farCullDisabled))
+			if (ImGui::Checkbox("##cullcheck", &farCullDisabled))
 			{
 				BYTE b = 0x76; //original conditional jmp byte
 				if (farCullDisabled)
@@ -133,39 +128,37 @@ static void draw_menu(bool* status)
 				uintptr_t tFarCull = getTerrainFarCullAddy();
 				if (tFarCull)
 					*(BYTE*)(tFarCull) = b;
-			}
-			
-			if (ImGui::Checkbox("##farcullcheckobjects", &farCullObjectsDisabled))
-			{
-				uintptr_t tFarCull = getObjectFarCullAddy();
-				if (tFarCull)
-				{
-					BYTE b = 0x0F; 
-					if (farCullObjectsDisabled) 
-					{
-						b = 0xE9;	
 
-						*(BYTE*)(tFarCull) = 0x90;
-						*(BYTE*)(tFarCull+1) = b;
+				//if (ImGui::Checkbox("##farcullcheckobjects", &farCullObjectsDisabled))
+
+				uintptr_t tFarCullObj = getObjectFarCullAddy();
+				if (tFarCullObj)
+				{
+					BYTE c = 0x0F;
+					if (farCullDisabled)
+					{
+						c = 0xE9;
+
+						*(BYTE*)(tFarCullObj) = 0x90;
+						*(BYTE*)(tFarCullObj + 1) = c;
 					}
 					else
 					{
-						*(BYTE*)(tFarCull) = b;
-						*(BYTE*)(tFarCull + 1) = 0x84;
+						*(BYTE*)(tFarCullObj) = b;
+						*(BYTE*)(tFarCullObj + 1) = 0x84;
 					}
 				}
-			}
 
-			if (ImGui::Checkbox("##nearcullcheck", &nearCullDisabled))
-			{
+				//if (ImGui::Checkbox("##nearcullcheck", &nearCullDisabled))
+
 				uintptr_t tNearCull = getCameraNearCullAddy();
 				if (tNearCull) {
-					
+
 					if (oNearCullBytes == 0x0)
 						oNearCullBytes = *(DWORD*)(tNearCull);
 
 					//meme
-					if (nearCullDisabled)
+					if (farCullDisabled)
 						*(DWORD*)(tNearCull) = (DWORD)(0x90909090);
 					else
 						*(DWORD*)(tNearCull) = (DWORD)(oNearCullBytes);
@@ -174,6 +167,11 @@ static void draw_menu(bool* status)
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 5);//tism
 			if (ImGui::Button("Play BGM", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
 				std::string s("Skit.Sound.BGM.Play('"+std::string(bgmbuf)+"')");
+				runLuaAsync(s);
+			}
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 5);
+			if (ImGui::Button("Get BGM", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
+				std::string s("Window.ShowError(Skit.Sound.BGM.Get('" + std::string(bgmbuf) + "'))");
 				runLuaAsync(s);
 			}
 			ImGui::EndColumns();
@@ -187,7 +185,7 @@ static void draw_menu(bool* status)
 
 	std::string pig("pig");
 	ImVec2 txt = ImGui::CalcTextSize(pig.c_str());
-	ImGui::SetCursorPosY(ImGui::GetWindowSize().y * .90f);
+	ImGui::SetCursorPosY(ImGui::GetWindowSize().y * .87f);
 	//ImGui::SetCursorPosY(ImGui::GetContentRegionAvail().y * 0.94f);
 	ImGui::Separator();
 

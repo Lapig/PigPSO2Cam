@@ -20,11 +20,6 @@ void luaPrint(std::string s) {
 
 	runLuaAsync(dist.c_str());
 }
-/*
-void resetParam() {
-	const char *a1 = "ResetParam()";
-	runLuaAsync(a1);
-}*/
 
 bool runLuaAsync(std::string a1) {
 	if (initLuaHook()) {
@@ -47,11 +42,9 @@ bool initLuaHook() {
 		return true;
 	HMODULE pso2h = GetModuleHandleA("pso2h.dll");
 	if (!pso2h) {
-//		Log("Failed to load pso2h.dll");
 		return false;
 	}
 	_executeLua = (pso2hDoLua)GetProcAddress(pso2h, MAKEINTRESOURCEA(8));	//pso2hDoLua ordinal 
-	
 
 	if (_executeLua) {
 		return true;
@@ -66,11 +59,9 @@ void menu_init(void *game_hwnd, LPDIRECT3DDEVICE9 Device)
 	ImGui_ImplWin32_Init(game_hwnd);
 	ImGui_ImplDX9_Init(Device);
 	ImGuiIO &io = ImGui::GetIO();
-//	io.WantCaptureKeyboard = true;
 	io.WantCaptureMouse = true;
 	io.Fonts->AddFontDefault();
 	io.IniFilename = NULL;
-	//io.DisplaySize = ImVec2(vp.Height, vp.Width);
 	hwnd = game_hwnd;
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.Alpha = 1.0;

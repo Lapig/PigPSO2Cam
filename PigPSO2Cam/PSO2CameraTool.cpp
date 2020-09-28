@@ -7,7 +7,8 @@
 #include "Asm.h"
 #include "imgui/settings_form.h"
 
-using namespace Asm;
+
+
 
 bool m_bCreated = false;
 bool wndproc_found = false;
@@ -65,6 +66,8 @@ uintptr_t getCameraNearCullAddy()
 }
 HRESULT __stdcall hkEndScene(LPDIRECT3DDEVICE9 Device)
 {
+	using namespace Asm;
+
 	if (Device == nullptr)
 		return oEndScene(Device);
 	if (!m_bCreated)
@@ -78,6 +81,7 @@ HRESULT __stdcall hkEndScene(LPDIRECT3DDEVICE9 Device)
 
 		game_hwnd = d3dcp.hFocusWindow;
 		
+
 		DWORD farCullScan = AobScan(cameraFarCullAob);
 		if (farCullScan)
 			cameraFarCullJna = farCullScan;
@@ -90,7 +94,6 @@ HRESULT __stdcall hkEndScene(LPDIRECT3DDEVICE9 Device)
 		if (nearCullScan)
 			cameraNearCullAddy = nearCullScan;
 		
-		//menu_init(d3dhwnd, Device);
 	}
 	if (!wndproc_found) {
 		HWND wnd = FindWindowA("Phantasy Star Online 2", NULL);
@@ -102,7 +105,7 @@ HRESULT __stdcall hkEndScene(LPDIRECT3DDEVICE9 Device)
 		}
 	}
 
-	if ((GetAsyncKeyState(0x2D) & 1)) { //insert
+	if ((GetAsyncKeyState(VK_INSERT) & 1)) { 
 		MENU_DISPLAYING = !MENU_DISPLAYING;
 	}
 	if (MENU_DISPLAYING )
@@ -148,7 +151,6 @@ bool CreateDeviceD3D(HWND hWnd)
 	g_d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
 	g_d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;
 	g_d3dpp.hDeviceWindow = tmpWnd;
-	//g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;           // Present with vsync
 	g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   // Present without vsync, maximum unthrottled framerate
 	if (g_pD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &g_d3dpp, &g_pd3dDevice) < 0)
 		return false;
@@ -180,23 +182,6 @@ DWORD WINAPI HookThread()
 	return 0;
 }
 
-BOOL CALLBACK find_game_hwnd(HWND hwnd, LPARAM game_pid) {
-	DWORD hwnd_pid = NULL;
-	GetWindowThreadProcessId(hwnd, &hwnd_pid);
-	if (hwnd_pid != game_pid)
-		return TRUE;
-	game_hwnd = hwnd;
-	return FALSE;
-}
-void ShowDebugConsole()
-{
-	AllocConsole();
-	AttachConsole(GetCurrentProcessId());
-
-	char charConsoleName[128];
-	sprintf_s(charConsoleName, "PSO2DEBUG | PID: %08X (%d)", GetCurrentProcessId(), GetCurrentProcessId());
-	SetConsoleTitleA(charConsoleName);
-}
 int Initialize() {
 	/*while (hmRendDx9Base == NULL)
 	{
