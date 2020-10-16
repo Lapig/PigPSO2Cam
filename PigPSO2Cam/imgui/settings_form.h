@@ -164,6 +164,8 @@ static void draw_menu(bool* status)
 						*(DWORD*)(tNearCull) = (DWORD)(oNearCullBytes);
 				}
 			}
+			if (ImGui::IsItemHovered())
+				ImGui::SetTooltip("No promises if you try to turn this off afterwards atm todo");
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 5);//tism
 			if (ImGui::Button("Play BGM", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
 				std::string s("Skit.Sound.BGM.Play('"+std::string(bgmbuf)+"')");
@@ -175,7 +177,6 @@ static void draw_menu(bool* status)
 				runLuaAsync(s);
 			}
 			ImGui::EndColumns();
-
 			
 		}
 		ImGui::EndGroup();
